@@ -76,6 +76,38 @@ namespace CarInsurance.Api.Tests.ServicesTests
             Assert.Equal("Claim date cannot be in the future", ex.Message);
         }
 
+        [Fact]
+        public async Task RegisterClaim_ShouldThrowArgumentException_WhenAmountIs0()
+        {
+            var carId = 1;
+            var claimRequest = new ClaimRequestDto(
+                ClaimDate: new DateOnly(2025, 1, 1),
+                Description: "Test claim",
+                Amount: 0m
+            );
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                async () => await _service.RegisterClaim(carId, claimRequest));
+
+            Assert.Equal("Amount cannot be 0 or negative", ex.Message);
+        }
+
+        [Fact]
+        public async Task RegisterClaim_ShouldThrowArgumentException_WhenAmountIsNegative()
+        {
+            var carId = 1;
+            var claimRequest = new ClaimRequestDto(
+                ClaimDate: new DateOnly(2025, 1, 1),
+                Description: "Test claim",
+                Amount: -50m
+            );
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                async () => await _service.RegisterClaim(carId, claimRequest));
+
+            Assert.Equal("Amount cannot be 0 or negative", ex.Message);
+        }
+
         // Tests for GetCarHistory method
 
         [Fact]

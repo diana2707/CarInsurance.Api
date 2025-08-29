@@ -33,6 +33,7 @@ public class CarService(AppDbContext db)
     {
         ValidateCarId(carId);
         ValidateClaimDate(claimRequest.ClaimDate);
+        ValidateAmount(claimRequest.Amount);
 
         var claim = new Claim
         {
@@ -98,6 +99,14 @@ public class CarService(AppDbContext db)
         if (claimDate > DateOnly.FromDateTime(DateTime.UtcNow))
         {
             throw new ArgumentException("Claim date cannot be in the future");
+        }
+    }
+
+    private void ValidateAmount(decimal amount)
+    {
+        if (amount <= 0)
+        {
+            throw new ArgumentException("Amount cannot be 0 or negative");
         }
     }
 }
