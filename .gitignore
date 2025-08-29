@@ -366,3 +366,5 @@ FodyWeavers.xsd
 .env*
 
 carins.db-*
+
+carins-test.db-*
