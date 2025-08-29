@@ -10,4 +10,4 @@ public record ClaimResponseDto(long Id, DateOnly ClaimDate, string? Description,
 
 public record CarHistoryEntryDto(long Id, string Type, DateOnly Date, string? Description, decimal? Amount, string? Provider, DateOnly? EndDate);
 
-public record CarHistoryDto(long CarId, string Vin, string? Model, int YearOfmanufacture, List<CarHistoryEntryDto> History);
+public record CarHistoryDto(long CarId, string Vin, string? Model, int YearOfManufacture, List<CarHistoryEntryDto> History);

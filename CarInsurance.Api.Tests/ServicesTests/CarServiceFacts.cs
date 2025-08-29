@@ -26,7 +26,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
             _service = new CarService(_db);
         }
 
-        // Tests fot RegisterClaim method
+        // Tests for RegisterClaim method
 
         [Fact]
         public async Task RegisterClaim_ShouldRegisterClaim_WhenCarExists()
@@ -45,6 +45,20 @@ namespace CarInsurance.Api.Tests.ServicesTests
             Assert.Equal(claimRequest.Amount, result.Amount);
             Assert.Equal(claimRequest.Description, result.Description);
             Assert.True(result.Id > 0);
+        }
+
+        // Tests for GetCarHistory method
+
+        [Fact]
+        public async Task GetCarHistory_ShouldReturnHistory_WhenCarExists()
+        {
+            var carId = 1;
+            var result = await _service.GetCarHistory(carId);
+
+            Assert.NotNull(result);
+            Assert.Equal(carId, result.CarId);
+            Assert.NotNull(result.Vin);
+            Assert.NotEmpty(result.History);
         }
 
         public void Dispose()
