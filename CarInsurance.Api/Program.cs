@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    //opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
-    opt.UseSqlite("Data Source=carins_test.db");
+    opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
+    //opt.UseSqlite("Data Source=carins_test.db");
 });
 
 builder.Services.AddScoped<CarService>();
