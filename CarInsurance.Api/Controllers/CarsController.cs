@@ -36,7 +36,7 @@ public class CarsController(CarService service) : ControllerBase
     {
         try
         {
-            var claimResponse = await _service.RegisterClaim(carId, claimRequest);
+            var claimResponse = await _service.RegisterClaimAsync(carId, claimRequest);
             var uri = $"/api/cars/{carId}/claims/{claimResponse.Id}";
 
             return Created(uri, claimResponse);
@@ -56,7 +56,7 @@ public class CarsController(CarService service) : ControllerBase
     {
         try
         {
-            var history = await _service.GetCarHistory(carId);
+            var history = await _service.GetCarHistoryAsync(carId);
             return Ok(history);
         }
         catch (KeyNotFoundException)

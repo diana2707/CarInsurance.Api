@@ -29,7 +29,7 @@ public class CarService(AppDbContext db)
         );
     }
 
-    public async Task<ClaimResponseDto> RegisterClaim(long carId, ClaimRequestDto claimRequest)
+    public async Task<ClaimResponseDto> RegisterClaimAsync(long carId, ClaimRequestDto claimRequest)
     {
         ValidateCarId(carId);
         ValidateClaimDate(claimRequest.ClaimDate);
@@ -49,7 +49,7 @@ public class CarService(AppDbContext db)
         return new ClaimResponseDto(claim.Id, claim.ClaimDate, claim.Description, claim.Amount);
     }
 
-    public async Task<CarHistoryDto> GetCarHistory(long carId)
+    public async Task<CarHistoryDto> GetCarHistoryAsync(long carId)
     {
         ValidateCarId(carId);
 
