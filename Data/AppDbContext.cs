@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Owner> Owners => Set<Owner>();
     public DbSet<Car> Cars => Set<Car>();
     public DbSet<InsurancePolicy> Policies => Set<InsurancePolicy>();
+    public DbSet<Claim> Claims => Set<Claim>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +24,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(p => p.EndDate)
             .IsRequired();
 
+        modelBuilder.Entity<Claim>()
+            .Property(c => c.ClaimDate)
+            .IsRequired();
+
+        modelBuilder.Entity<Claim>()
+            .Property(c => c.Amount)
+            .IsRequired();
+
+        modelBuilder.Entity<Claim>()
+            .HasOne(c => c.Car)
+            .WithMany(car => car.Claims)
+            .HasForeignKey(c => c.CarId)
+            .IsRequired();
+
         // EndDate intentionally left nullable for a later task
     }
 }
@@ -31,23 +46,38 @@ public static class SeedData
 {
     public static void EnsureSeeded(AppDbContext db)
     {
-        if (db.Owners.Any()) return;
 
-        var ana = new Owner { Name = "Ana Pop", Email = "ana.pop@example.com" };
-        var bogdan = new Owner { Name = "Bogdan Ionescu", Email = "bogdan.ionescu@example.com" };
-        db.Owners.AddRange(ana, bogdan);
-        db.SaveChanges();
+        if (!db.Owners.Any())
+        {
+            var ana = new Owner { Name = "Ana Pop", Email = "ana.pop@example.com" };
+            var bogdan = new Owner { Name = "Bogdan Ionescu", Email = "bogdan.ionescu@example.com" };
+            db.Owners.AddRange(ana, bogdan);
+            db.SaveChanges();
 
-        var car1 = new Car { Vin = "VIN12345", Make = "Dacia", Model = "Logan", YearOfManufacture = 2018, OwnerId = ana.Id };
-        var car2 = new Car { Vin = "VIN67890", Make = "VW", Model = "Golf", YearOfManufacture = 2021, OwnerId = bogdan.Id };
-        db.Cars.AddRange(car1, car2);
-        db.SaveChanges();
+            var car1 = new Car { Vin = "VIN12345", Make = "Dacia", Model = "Logan", YearOfManufacture = 2018, OwnerId = ana.Id };
+            var car2 = new Car { Vin = "VIN67890", Make = "VW", Model = "Golf", YearOfManufacture = 2021, OwnerId = bogdan.Id };
+            db.Cars.AddRange(car1, car2);
+            db.SaveChanges();
 
-        db.Policies.AddRange(
-            new InsurancePolicy { CarId = car1.Id, Provider = "Allianz", StartDate = new DateOnly(2024,1,1), EndDate = new DateOnly(2024,12,31) },
-            new InsurancePolicy { CarId = car1.Id, Provider = "Groupama", StartDate = new DateOnly(2025,1,1), EndDate = new DateOnly(2025, 12, 31) }, // open-ended on purpose
-            new InsurancePolicy { CarId = car2.Id, Provider = "Allianz", StartDate = new DateOnly(2025,3,1), EndDate = new DateOnly(2025,9,30) }
-        );
-        db.SaveChanges();
+            db.Policies.AddRange(
+                new InsurancePolicy { CarId = car1.Id, Provider = "Allianz", StartDate = new DateOnly(2024, 1, 1), EndDate = new DateOnly(2024, 12, 31) },
+                new InsurancePolicy { CarId = car1.Id, Provider = "Groupama", StartDate = new DateOnly(2025, 1, 1), EndDate = new DateOnly(2025, 12, 31) }, // open-ended on purpose
+                new InsurancePolicy { CarId = car2.Id, Provider = "Allianz", StartDate = new DateOnly(2025, 3, 1), EndDate = new DateOnly(2025, 9, 30) }
+            );
+            db.SaveChanges();
+        }
+
+        if (!db.Claims.Any())
+        {
+            var car1 = db.Cars.First(c => c.Vin == "VIN12345");
+            var car2 = db.Cars.First(c => c.Vin == "VIN67890");
+            db.Claims.AddRange(
+                new Claim { CarId = car1.Id, ClaimDate = new DateOnly(2024, 5, 20), Description = "Rear-end collision", Amount = 1500m },
+                new Claim { CarId = car1.Id, ClaimDate = new DateOnly(2025, 8, 15), Description = "Windshield replacement", Amount = 300m },
+                new Claim { CarId = car2.Id, ClaimDate = new DateOnly(2025, 10, 10), Description = null, Amount = 800m }
+            );
+            db.SaveChanges();
+        }
+
     }
 }

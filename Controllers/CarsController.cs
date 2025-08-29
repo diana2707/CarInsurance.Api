@@ -30,4 +30,20 @@ public class CarsController(CarService service) : ControllerBase
             return NotFound();
         }
     }
+
+    [HttpPost("cars/{carId:long}/register-claim")]
+    public async Task<ActionResult<ClaimResponseDto>> RegisterClaim(long carId, [FromBody] ClaimRequestDto claimRequest)
+    {
+        try
+        {
+            var claimResponse = await _service.RegisterClaim(carId, claimRequest);
+            var uri = $"/api/cars/{carId}/claims/{claimResponse.Id}";
+
+            return Created(uri, claimResponse);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
 }

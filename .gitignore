@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # Environment variables
 .env*
+
+carins.db-*
