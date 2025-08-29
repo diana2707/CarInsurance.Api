@@ -189,6 +189,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
 
         public void Dispose()
         {
+            _db.Database.CloseConnection();
             _db.Dispose();
         }
 
