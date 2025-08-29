@@ -1,12 +1,8 @@
 ﻿using CarInsurance.Api.Data;
+using CarInsurance.Api.Models;
 using CarInsurance.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace CarInsurance.Api.Tests.ServicesTests
 {
@@ -32,15 +28,105 @@ namespace CarInsurance.Api.Tests.ServicesTests
         }
 
         [Fact]
-        public async Task ExecuteAsync_LogsExpiringPolicies()
+        public async Task RunOnce_LogsExpiringPolicies_PoliciesExist()
         {
-            var logger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger);
-            // Run the method (it will check for policies expiring in 30 days)
-            await logger.StartAsync(CancellationToken.None);
-            // Since we have a policy expiring on 2024-12-15 and today is 2024-11-15,
-            // it should log that policy.
-            // Note: The actual logging output is printed to the console by FakeLogger.
-            // Here we would normally assert on the logged messages if we had access to them.
+            FakeDateTimeProvider nowPovider = new();
+            nowPovider.UtcNow = new DateTime(2025, 8, 29, 0, 0, 1);
+
+            var policy = new InsurancePolicy
+            {
+                CarId = 1,
+                Provider = "Test",
+                StartDate = new DateOnly(2025, 1, 1),
+                EndDate = new DateOnly(2025, 8, 29)
+            };
+            _db.Policies.Add(policy);
+            _db.SaveChanges();
+
+            string expectedMsg = $"Policy with ID {policy.Id} for Car ID {policy.CarId} expired on {policy.EndDate}.";
+
+            var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
+            await policyLoger.RunOnce(CancellationToken.None, _db);
+
+            Assert.NotNull(_fakeLogger);
+            Assert.Equal(expectedMsg, _fakeLogger.Messages.First());
+        }
+
+        [Fact]
+        public async Task RunOnce_LogsExpiringPolicies_NoPolicieExist()
+        {
+            FakeDateTimeProvider nowPovider = new();
+            nowPovider.UtcNow = new DateTime(2025, 8, 29, 0, 0, 1);
+
+            var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
+            await policyLoger.RunOnce(CancellationToken.None, _db);
+
+            Assert.NotNull(_fakeLogger);
+            Assert.Empty(_fakeLogger.Messages);
+        }
+
+        [Fact]
+        public async Task RunOnce_LogsExpiringPolicies_LogMultiplePolicies()
+        {
+            FakeDateTimeProvider nowPovider = new();
+            nowPovider.UtcNow = new DateTime(2025, 8, 29, 0, 0, 1);
+
+            _db.Policies.AddRange(
+                new InsurancePolicy { CarId = 1, Provider = "A", StartDate = new DateOnly(2025, 1, 1), EndDate = new DateOnly(2025, 8, 29) },
+                new InsurancePolicy { CarId = 2, Provider = "B", StartDate = new DateOnly(2025, 1, 1), EndDate = new DateOnly(2025, 8, 29) });
+            _db.SaveChanges();
+
+            var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
+
+            await policyLoger.RunOnce(CancellationToken.None, _db);
+
+            Assert.Equal(2, _fakeLogger.Messages.Count);
+        }
+
+        [Fact]
+        public async Task RunOnce_LogsExpiringPolicies_LoggedOneHourAgo()
+        {
+            FakeDateTimeProvider nowPovider = new();
+            nowPovider.UtcNow = new DateTime(2025, 8, 29, 1, 0, 0);
+
+            var policy = new InsurancePolicy
+            {
+                CarId = 1,
+                Provider = "Test",
+                StartDate = new DateOnly(2025, 1, 1),
+                EndDate = new DateOnly(2025, 8, 29)
+            };
+            _db.Policies.Add(policy);
+            _db.SaveChanges();
+
+            var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
+
+            await policyLoger.RunOnce(CancellationToken.None, _db);
+
+            Assert.Single(_fakeLogger.Messages);
+        }
+
+        [Fact]
+        public async Task RunOnce_LogsExpiringPolicies_LoggedNow()
+        {
+            FakeDateTimeProvider nowPovider = new();
+            nowPovider.UtcNow = new DateTime(2025, 8, 29, 0, 0, 0);
+
+            var policy = new InsurancePolicy
+            {
+                CarId = 1,
+                Provider = "Test",
+                StartDate = new DateOnly(2025, 1, 1),
+                EndDate = new DateOnly(2025, 8, 29)
+            };
+            _db.Policies.Add(policy);
+            _db.SaveChanges();
+
+            var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
+
+            await policyLoger.RunOnce(CancellationToken.None, _db);
+
+            Assert.Single(_fakeLogger.Messages);
         }
 
         public void Dispose()

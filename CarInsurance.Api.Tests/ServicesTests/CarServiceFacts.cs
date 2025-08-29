@@ -1,11 +1,7 @@
 ﻿using CarInsurance.Api.Data;
 using CarInsurance.Api.Dtos;
-using CarInsurance.Api.Models;
 using CarInsurance.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using Xunit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CarInsurance.Api.Tests.ServicesTests
 {

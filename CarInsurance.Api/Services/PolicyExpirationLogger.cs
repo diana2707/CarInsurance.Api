@@ -1,5 +1,5 @@
 ﻿using CarInsurance.Api.Data;
-using CarInsurance.Api.Models;
+using CarInsurance.Api.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("CarInsurance.Api.Tests")]
@@ -12,13 +12,13 @@ namespace CarInsurance.Api.Services
         private readonly ILogger<PolicyExpirationLogger> _logger;
         private readonly TimeSpan intervalCheck = TimeSpan.FromMinutes(10);
         private readonly List<long> loggedPolicies = new();
-        private readonly DateTime _now;
+        private readonly IDateTimeProvider _nowProvider;
 
-        public PolicyExpirationLogger(IServiceScopeFactory scopeFactory, ILogger<PolicyExpirationLogger> logger, DateTime now)
+        public PolicyExpirationLogger(IServiceScopeFactory scopeFactory, ILogger<PolicyExpirationLogger> logger, IDateTimeProvider nowProvider)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
-            _now = now;
+            _nowProvider = nowProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,10 +36,18 @@ namespace CarInsurance.Api.Services
 
         internal async Task RunOnce(CancellationToken stoppingToken, AppDbContext db)
         {
-            var expiredPolicies = await db.Policies.Where(p => p.EndDate.ToDateTime(TimeOnly.MinValue) < _now
-                                           && p.EndDate.ToDateTime(TimeOnly.MinValue) > _now.AddHours(-1)
-                                           && !loggedPolicies.Contains(p.Id))
-                                           .ToListAsync();
+            DateTime now = _nowProvider.UtcNow;
+            DateTime oneHourAgo = now.AddHours(-1);
+
+            var candidatePolicies = await db.Policies
+                .Where(p => p.EndDate <= DateOnly.FromDateTime(now))
+                .ToListAsync(stoppingToken);
+
+            var expiredPolicies = candidatePolicies
+                .Where(p => p.EndDate.ToDateTime(TimeOnly.MinValue) <= now
+                         && p.EndDate.ToDateTime(TimeOnly.MinValue) >= oneHourAgo
+                         && !loggedPolicies.Contains(p.Id))
+                .ToList();
 
             loggedPolicies.AddRange(expiredPolicies.Select(p => p.Id));
 
