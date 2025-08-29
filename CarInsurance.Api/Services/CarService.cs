@@ -19,8 +19,7 @@ public class CarService(AppDbContext db)
 
     public async Task<bool> IsInsuranceValidAsync(long carId, DateOnly date)
     {
-        var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        ValidateCarId(carId);
 
         return await _db.Policies.AnyAsync(p =>
             p.CarId == carId &&
@@ -31,8 +30,7 @@ public class CarService(AppDbContext db)
 
     public async Task<ClaimResponseDto> RegisterClaim(long carId, ClaimRequestDto claimRequest)
     {
-        var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        ValidateCarId(carId);
 
         var claim = new Claim
         {
@@ -50,8 +48,7 @@ public class CarService(AppDbContext db)
 
     public async Task<CarHistoryDto> GetCarHistory(long carId)
     {
-        var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        ValidateCarId(carId);
 
         var car = await _db.Cars
             .Include(c => c.Policies)
@@ -83,6 +80,14 @@ public class CarService(AppDbContext db)
         carHistory = carHistory.OrderByDescending(h => h.Date).ToList();
 
         return new CarHistoryDto(car.Id, car.Vin, car.Model, car.YearOfManufacture, carHistory);
+    }
 
+    private void ValidateCarId(long carId)
+    {
+        var carExists = _db.Cars.Any(c => c.Id == carId);
+        if (!carExists)
+        {
+            throw new KeyNotFoundException($"Car {carId} not found");
+        }
     }
 }
