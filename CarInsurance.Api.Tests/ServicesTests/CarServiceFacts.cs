@@ -47,6 +47,35 @@ namespace CarInsurance.Api.Tests.ServicesTests
             Assert.True(result.Id > 0);
         }
 
+        [Fact]
+        public async Task RegisterClaim_ShouldThrowKeyNotFoundException_WhenCarNotExist()
+        {
+            var carId = 50;
+            var claimRequest = new ClaimRequestDto(
+                ClaimDate: new DateOnly(2025, 1, 1),
+                Description: "Test claim",
+                Amount: 1000m
+            );
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _service.RegisterClaim(carId, claimRequest));
+        }
+
+        [Fact]
+        public async Task RegisterClaim_ShouldThrowArgumentException_WhenDateIsInFuture()
+        {
+            var carId = 1;
+            var claimRequest = new ClaimRequestDto(
+                ClaimDate: new DateOnly(2500, 1, 1),
+                Description: "Test claim",
+                Amount: 1000m
+            );
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                async () => await _service.RegisterClaim(carId, claimRequest));
+
+            Assert.Equal("Claim date cannot be in the future", ex.Message);
+        }
+
         // Tests for GetCarHistory method
 
         [Fact]
@@ -59,6 +88,14 @@ namespace CarInsurance.Api.Tests.ServicesTests
             Assert.Equal(carId, result.CarId);
             Assert.NotNull(result.Vin);
             Assert.NotEmpty(result.History);
+        }
+
+        [Fact]
+        public async Task GetCarHistory_ShouldThrowKeyNotFoundException_WhenCarNotExist()
+        {
+            var carId = 100;
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _service.GetCarHistory(carId));
         }
 
         public void Dispose()

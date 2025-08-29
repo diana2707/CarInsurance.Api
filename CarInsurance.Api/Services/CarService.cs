@@ -2,6 +2,7 @@ using CarInsurance.Api.Data;
 using CarInsurance.Api.Dtos;
 using CarInsurance.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CarInsurance.Api.Services;
 
@@ -31,6 +32,7 @@ public class CarService(AppDbContext db)
     public async Task<ClaimResponseDto> RegisterClaim(long carId, ClaimRequestDto claimRequest)
     {
         ValidateCarId(carId);
+        ValidateClaimDate(claimRequest.ClaimDate);
 
         var claim = new Claim
         {
@@ -88,6 +90,14 @@ public class CarService(AppDbContext db)
         if (!carExists)
         {
             throw new KeyNotFoundException($"Car {carId} not found");
+        }
+    }
+
+    private void ValidateClaimDate(DateOnly claimDate)
+    {
+        if (claimDate > DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            throw new ArgumentException("Claim date cannot be in the future");
         }
     }
 }

@@ -45,6 +45,10 @@ public class CarsController(CarService service) : ControllerBase
         {
             return NotFound();
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpGet("cars/{carId:long}/history")]
