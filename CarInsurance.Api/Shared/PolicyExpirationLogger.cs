@@ -1,10 +1,9 @@
 ﻿using CarInsurance.Api.Data;
-using CarInsurance.Api.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("CarInsurance.Api.Tests")]
 
-namespace CarInsurance.Api.Services
+namespace CarInsurance.Api.Shared
 {
     public class PolicyExpirationLogger : BackgroundService
     {
@@ -14,7 +13,10 @@ namespace CarInsurance.Api.Services
         private readonly List<long> loggedPolicies = new();
         private readonly IDateTimeProvider _nowProvider;
 
-        public PolicyExpirationLogger(IServiceScopeFactory scopeFactory, ILogger<PolicyExpirationLogger> logger, IDateTimeProvider nowProvider)
+        public PolicyExpirationLogger(
+            IServiceScopeFactory scopeFactory,
+            ILogger<PolicyExpirationLogger> logger,
+            IDateTimeProvider nowProvider)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -27,14 +29,14 @@ namespace CarInsurance.Api.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                await RunOnce(stoppingToken, db);
+                await RunOnce(db, stoppingToken);
 
 
                 await Task.Delay(intervalCheck, stoppingToken);
             }
         }
 
-        internal async Task RunOnce(CancellationToken stoppingToken, AppDbContext db)
+        internal async Task RunOnce(AppDbContext db, CancellationToken stoppingToken)
         {
             DateTime now = _nowProvider.UtcNow;
             DateTime oneHourAgo = now.AddHours(-1);

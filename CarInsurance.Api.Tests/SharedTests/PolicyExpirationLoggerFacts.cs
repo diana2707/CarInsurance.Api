@@ -1,10 +1,11 @@
 ﻿using CarInsurance.Api.Data;
 using CarInsurance.Api.Models;
-using CarInsurance.Api.Services;
+using CarInsurance.Api.Shared;
+using CarInsurance.Api.Tests.SharedTests.Fakes;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace CarInsurance.Api.Tests.ServicesTests
+namespace CarInsurance.Api.Tests.SharedTests
 {
     public class PolicyExpirationLoggerFacts : IDisposable
     {
@@ -46,7 +47,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
             string expectedMsg = $"Policy with ID {policy.Id} for Car ID {policy.CarId} expired on {policy.EndDate}.";
 
             var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
-            await policyLoger.RunOnce(CancellationToken.None, _db);
+            await policyLoger.RunOnce(_db, CancellationToken.None);
 
             Assert.NotNull(_fakeLogger);
             Assert.Equal(expectedMsg, _fakeLogger.Messages.First());
@@ -59,7 +60,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
             nowPovider.UtcNow = new DateTime(2025, 8, 29, 0, 0, 1);
 
             var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
-            await policyLoger.RunOnce(CancellationToken.None, _db);
+            await policyLoger.RunOnce(_db, CancellationToken.None);
 
             Assert.NotNull(_fakeLogger);
             Assert.Empty(_fakeLogger.Messages);
@@ -78,7 +79,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
 
             var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
 
-            await policyLoger.RunOnce(CancellationToken.None, _db);
+            await policyLoger.RunOnce(_db, CancellationToken.None);
 
             Assert.Equal(2, _fakeLogger.Messages.Count);
         }
@@ -101,7 +102,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
 
             var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
 
-            await policyLoger.RunOnce(CancellationToken.None, _db);
+            await policyLoger.RunOnce(_db, CancellationToken.None);
 
             Assert.Single(_fakeLogger.Messages);
         }
@@ -124,7 +125,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
 
             var policyLoger = new PolicyExpirationLogger(_fakeScopeFactory, _fakeLogger, nowPovider);
 
-            await policyLoger.RunOnce(CancellationToken.None, _db);
+            await policyLoger.RunOnce(_db, CancellationToken.None);
 
             Assert.Single(_fakeLogger.Messages);
         }

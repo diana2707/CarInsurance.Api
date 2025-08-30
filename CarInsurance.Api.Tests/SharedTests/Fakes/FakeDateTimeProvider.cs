@@ -1,6 +1,6 @@
 ﻿using CarInsurance.Api.Shared;
 
-namespace CarInsurance.Api.Tests.ServicesTests
+namespace CarInsurance.Api.Tests.SharedTests.Fakes
 {
     public class FakeDateTimeProvider : IDateTimeProvider
     {

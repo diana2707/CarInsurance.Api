@@ -24,6 +24,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
         }
 
         // Tests for IsInsuranceValidAsync method
+
         [Fact]
         public async Task IsInsuranceValidAsync_ShouldReturnTrue_WhenInsuranceActive()
         {

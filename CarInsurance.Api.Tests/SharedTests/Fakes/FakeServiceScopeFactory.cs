@@ -1,8 +1,8 @@
-﻿using CarInsurance.Api.Services;
+﻿using CarInsurance.Api.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CarInsurance.Api.Tests.ServicesTests
+namespace CarInsurance.Api.Tests.SharedTests.Fakes
 {
     public class FakeServiceScopeFactory : IServiceScopeFactory
     {

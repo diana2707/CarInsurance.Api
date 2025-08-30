@@ -2,7 +2,6 @@ using CarInsurance.Api.Data;
 using CarInsurance.Api.Dtos;
 using CarInsurance.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CarInsurance.Api.Services;
 
