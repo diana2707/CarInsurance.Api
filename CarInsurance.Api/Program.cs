@@ -1,13 +1,13 @@
 using CarInsurance.Api.Data;
 using CarInsurance.Api.Services;
+using CarInsurance.Api.Shared;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    //opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
-    opt.UseSqlite("Data Source=carins_test.db");
+    opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
 });
 
 builder.Services.AddScoped<CarService>();
@@ -15,6 +15,8 @@ builder.Services.AddScoped<CarService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddHostedService<PolicyExpirationLogger>();
 
 var app = builder.Build();
 

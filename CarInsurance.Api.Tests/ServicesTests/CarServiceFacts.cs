@@ -1,11 +1,7 @@
 ﻿using CarInsurance.Api.Data;
 using CarInsurance.Api.Dtos;
-using CarInsurance.Api.Models;
 using CarInsurance.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using Xunit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CarInsurance.Api.Tests.ServicesTests
 {
@@ -28,6 +24,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
         }
 
         // Tests for IsInsuranceValidAsync method
+
         [Fact]
         public async Task IsInsuranceValidAsync_ShouldReturnTrue_WhenInsuranceActive()
         {
@@ -189,6 +186,7 @@ namespace CarInsurance.Api.Tests.ServicesTests
 
         public void Dispose()
         {
+            _db.Database.CloseConnection();
             _db.Dispose();
         }
 
